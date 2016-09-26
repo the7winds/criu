@@ -8,6 +8,7 @@
 #include "asm/types.h"
 #include "asm/fpu.h"
 #include "asm/restorer.h"
+#include "asm/dump.h"
 
 #include "cr_options.h"
 #include "compiler.h"
@@ -501,11 +502,8 @@ static int put_tm_regs(struct rt_sigframe *f, UserPpc64TmRegsEntry *tme)
 	return 0;
 }
 
-static int save_task_regs(CoreEntry *core,
-		user_regs_struct_t *regs, user_fpregs_struct_t *fpregs);
-
 /****************************************************************************/
-int get_task_regs(pid_t pid, user_regs_struct_t regs, CoreEntry *core)
+int get_task_regs(pid_t pid, user_regs_struct_t regs, save_regs_t save, void *arg)
 {
 	user_fpregs_struct_t fpregs;
 	int ret;
@@ -588,12 +586,13 @@ int get_task_regs(pid_t pid, user_regs_struct_t regs, CoreEntry *core)
 		}
 	}
 
-	return save_task_regs(core, &regs, &fpregs);
+	return save(arg, &regs, &fpregs);
 }
 
-static int save_task_regs(CoreEntry *core,
-		user_regs_struct_t *regs, user_fpregs_struct_t *fpregs)
+int save_task_regs(void *x, user_regs_struct_t *regs, user_fpregs_struct_t *fpregs)
 {
+	CoreEntry *core = x;
+
 	UserPpc64RegsEntry *gpregs;
 	UserPpc64FpstateEntry **fpstate;
 	UserPpc64VrstateEntry **vrstate;
