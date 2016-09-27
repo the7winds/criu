@@ -36,6 +36,8 @@ struct infect_ctx {
 	int (*save_regs)(void *, user_regs_struct_t *, user_fpregs_struct_t *);
 	int (*make_sigframe)(void *, struct rt_sigframe *, struct rt_sigframe *, k_rtsigset_t *);
 	void *regs_arg;
+
+	unsigned long		syscall_ip;				/* entry point of infection */
 };
 
 /* parasite control block */
@@ -60,7 +62,6 @@ struct parasite_ctl {
 	void			*r_thread_stack;			/* stack for non-leader threads */
 
 	unsigned long		parasite_ip;				/* service routine start ip */
-	unsigned long		syscall_ip;				/* entry point of infection */
 
 	unsigned int		*addr_cmd;				/* addr for command */
 	void			*addr_args;				/* address for arguments */
@@ -115,7 +116,7 @@ extern struct parasite_ctl *parasite_infect_seized(pid_t pid,
 						   struct vm_area_list *vma_area_list);
 extern void parasite_ensure_args_size(unsigned long sz);
 extern unsigned long get_exec_start(struct vm_area_list *);
-extern struct parasite_ctl *parasite_prep_ctl(pid_t pid, unsigned long exec_start);
+extern struct parasite_ctl *parasite_prep_ctl(pid_t pid);
 extern int parasite_map_exchange(struct parasite_ctl *ctl, unsigned long size);
 
 extern int parasite_dump_cgroup(struct parasite_ctl *ctl, struct parasite_dump_cgroup_args *cgroup);
