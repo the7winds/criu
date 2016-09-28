@@ -38,7 +38,11 @@ struct infect_ctx {
 	void *regs_arg;
 
 	unsigned long		syscall_ip;				/* entry point of infection */
+	unsigned long		flags;			/* fine-tune (e.g. faults) */
 };
+
+#define INFECT_NO_MEMFD		0x1	/* don't use memfd() */
+#define INFECT_FAIL_CONNECT	0x2	/* make parasite connect() fail */
 
 struct parasite_ctl;
 
