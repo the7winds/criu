@@ -39,6 +39,8 @@ struct infect_ctx {
 
 	unsigned long		syscall_ip;				/* entry point of infection */
 	unsigned long		flags;			/* fine-tune (e.g. faults) */
+
+	void (*child_handler)(int, siginfo_t *, void *);	/* hander for SIGCHLD deaths */
 };
 
 #define INFECT_NO_MEMFD		0x1	/* don't use memfd() */
