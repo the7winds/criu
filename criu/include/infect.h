@@ -99,4 +99,6 @@ extern struct infect_ctx *compel_infect_ctx(struct parasite_ctl *);
 #define INFECT_FAIL_CONNECT	0x2	/* make parasite connect() fail */
 #define INFECT_NO_BREAKPOINTS	0x4	/* no breakpoints in pie tracking */
 
+extern int compel_mode_native(struct parasite_ctl *ctl);
+
 #endif
