@@ -32,9 +32,6 @@ struct parasite_ctl {
 	int			tsock;					/* transport socket for transferring fds */
 };
 
-#define MEMFD_FNAME	"CRIUMFD"
-#define MEMFD_FNAME_SZ	sizeof(MEMFD_FNAME)
-
 struct ctl_msg;
 int parasite_wait_ack(int sockfd, unsigned int cmd, struct ctl_msg *m);
 

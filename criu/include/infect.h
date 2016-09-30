@@ -37,6 +37,7 @@ extern int compel_cure_local(struct parasite_ctl *ctl);
 extern int compel_cure(struct parasite_ctl *ctl);
 
 #define PARASITE_ARG_SIZE_MIN	( 1 << 12)
+#define PARASITE_START_AREA_MIN	(4096)
 
 #define compel_parasite_args(ctl, type)					\
 	({								\

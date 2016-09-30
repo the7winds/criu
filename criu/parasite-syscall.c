@@ -58,7 +58,7 @@ unsigned long get_exec_start(struct vm_area_list *vmas)
 			continue;
 
 		len = vma_area_len(vma_area);
-		if (len < BUILTIN_SYSCALL_SIZE + MEMFD_FNAME_SZ) {
+		if (len < PARASITE_START_AREA_MIN) {
 			pr_warn("Suspiciously short VMA @%#lx\n", (unsigned long)vma_area->e->start);
 			continue;
 		}

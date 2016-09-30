@@ -21,6 +21,9 @@
 #include "infect-rpc.h"
 #include "infect-priv.h"
 
+#define MEMFD_FNAME	"CRIUMFD"
+#define MEMFD_FNAME_SZ	sizeof(MEMFD_FNAME)
+
 #define PTRACE_EVENT_STOP	128
 
 #ifndef SECCOMP_MODE_DISABLED
@@ -644,6 +647,7 @@ static int parasite_memfd_exchange(struct parasite_ctl *ctl, unsigned long size)
 		return 1;
 
 	BUILD_BUG_ON(sizeof(orig_code) < sizeof(long));
+	BUILD_BUG_ON(PARASITE_START_AREA_MIN < BUILTIN_SYSCALL_SIZE + MEMFD_FNAME_SZ);
 
 	if (ptrace_swap_area(pid, where, (void *)orig_code, sizeof(orig_code))) {
 		pr_err("Can't inject memfd args (pid: %d)\n", pid);
