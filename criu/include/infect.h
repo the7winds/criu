@@ -101,4 +101,6 @@ extern struct infect_ctx *compel_infect_ctx(struct parasite_ctl *);
 
 extern int compel_mode_native(struct parasite_ctl *ctl);
 
+extern k_rtsigset_t *compel_task_sigmask(struct parasite_ctl *ctl);
+
 #endif
