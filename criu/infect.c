@@ -1208,3 +1208,8 @@ goon:
 
 	return 0;
 }
+
+struct infect_ctx *compel_infect_ctx(struct parasite_ctl *ctl)
+{
+	return &ctl->ictx;
+}
