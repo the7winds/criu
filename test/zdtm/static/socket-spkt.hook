@@ -1,0 +1,11 @@
+#!/bin/bash
+
+[ "$1" == "--clean" ] || exit 0
+
+TAPNAME="zdtmtap0"
+
+if [ "$1" == "--clean" ]; then
+	if [ "`ip link show | grep "$TAPNAME:"`" ]; then
+		ip link delete "$TAPNAME"
+	fi
+fi
