@@ -1,5 +1,7 @@
 #include <linux/if_packet.h>
 #include <sys/socket.h>
+#include <net/if.h>
+#include <sys/ioctl.h>
 #include <linux/netlink.h>
 #include <linux/rtnetlink.h>
 #include <libnl3/netlink/msg.h>
@@ -403,21 +405,16 @@ static int restore_rings(int sk, PacketSockEntry *psk)
 	return 0;
 }
 
-static int open_packet_sk(struct file_desc *d)
+static int open_packet_socket(PacketSockEntry *pse)
 {
-	struct packet_sock_info *psi;
-	PacketSockEntry *pse;
 	struct sockaddr_ll addr;
 	int sk, yes;
-
-	psi = container_of(d, struct packet_sock_info, d);
-	pse = psi->pse;
 
 	pr_info("Opening packet socket id %#x\n", pse->id);
 
 	sk = socket(PF_PACKET, pse->type, pse->protocol);
 	if (sk < 0) {
-		pr_perror("Can't create packet sock");
+		pr_perror("Can't create packet socket");
 		goto err;
 	}
 
@@ -490,6 +487,74 @@ err_cl:
 	close(sk);
 err:
 	return -1;
+}
+
+static int open_packet_spkt_socket(PacketSockEntry *pse)
+{
+	struct sockaddr addr_spkt;
+	int sk;
+
+	pr_info("Opening packet socket id %#x\n", pse->id);
+
+	sk = socket(PF_PACKET, pse->type, pse->protocol);
+	if (sk < 0) {
+		pr_perror("Can't create packet sock");
+		goto err;
+	}
+
+	memset(&addr_spkt, 0, sizeof(addr_spkt));
+	addr_spkt.sa_family = AF_PACKET;
+
+	// ifindex is a positive number
+	if (pse->ifindex > 0) {
+		struct ifreq req;
+
+		memset(&req, 0, sizeof(req));
+		req.ifr_ifindex = pse->ifindex;
+
+		if (ioctl(sk, SIOCGIFNAME, &req) < 0) {
+			pr_debug("Can't get device name (ifindex %d)", pse->ifindex);
+			goto err_cl;
+		}
+
+		// if the socket was bound to any device
+		strcpy(addr_spkt.sa_data, req.ifr_name);
+
+		if (bind(sk, &addr_spkt, sizeof(addr_spkt)) < 0) {
+			pr_perror("Can't bind packet socket to %s", req.ifr_name);
+			goto err_cl;
+		}
+
+		pr_debug("Bound to %s\n", req.ifr_name);
+	}
+
+	if (rst_file_params(sk, pse->fown, pse->flags))
+		goto err_cl;
+
+	if (restore_socket_opts(sk, pse->opts))
+		goto err_cl;
+
+	return sk;
+
+err_cl:
+	close(sk);
+err:
+	return -1;
+}
+
+static int open_packet_sk(struct file_desc *d)
+{
+	struct packet_sock_info *psi;
+	PacketSockEntry *pse;
+
+	psi = container_of(d, struct packet_sock_info, d);
+	pse = psi->pse;
+
+	if (pse->type != SOCK_PACKET) {
+		return open_packet_socket(pse);
+	} else {
+		return open_packet_spkt_socket(pse);
+	}
 }
 
 static struct file_desc_ops packet_sock_desc_ops = {
